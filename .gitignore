@@ -1,0 +1,16 @@
+# Không đẩy dữ liệu Wikispeedia lớn lên GitHub.
+data/*.tar.gz
+data/wikispeedia_paths-and-graph/
+data/plaintext_articles/
+data/extracted/
+# Kết quả chạy / file tạm
+autograder_tmp/
+grading_reports/
+output/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.DS_Store
+.pytest_cache/
