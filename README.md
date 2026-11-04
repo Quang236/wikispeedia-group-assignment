@@ -56,21 +56,7 @@ Khi tất cả TODO được hoàn thiện, `python3 submission.py` tạo 4 file
 
 **Một lần, người quản lý repository:**
 
-1. Tạo repo **private** tên `wikispeedia-group-assignment` tại https://github.com/new
-   (KHÔNG tích chọn tạo README/.gitignore vì bộ này đã có).
-2. Giải nén starter ZIP, mở Terminal bên trong thư mục `wikispeedia-team-starter`.
-3. Chạy lệnh dưới đây (thay `USERNAME` bằng tên GitHub của người tạo repo):
-
-```bash
-git init -b main
-git add .
-git commit -m "Initialize Wikispeedia group project"
-git remote add origin https://github.com/USERNAME/wikispeedia-group-assignment.git
-git push -u origin main
-```
-
-**Mời các thành viên:** GitHub repo → Settings → Collaborators → Add people.
-Không công khai bài đang làm, không đưa token/mật khẩu lên repo.
+đã thông báo trên Zalo
 
 **Mỗi người làm trên nhánh riêng:**
 
