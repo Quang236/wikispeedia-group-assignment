@@ -1,15 +1,32 @@
-"""Người 2 — Topic PageRank và Similarity.
+"""NGƯỜI 2 — PHẦN B: TOPIC-SENSITIVE PAGERANK (30 ĐIỂM)
 
-Chỉ sửa các hàm được giao. KHÔNG sửa tên hàm/chữ ký hàm từ đề gốc.
-Chạy `python3 build_submission.py` ở thư mục gốc để ghép tự động.
-Có thể thêm import và hàm phụ ở cấp module; script ghép sẽ thu thập chúng.
+PHÂN CÔNG: Chỉ viết các hàm TODO trong file này.
+HƯỚNG DẪN:
+- Mỗi hàm được đánh dấu PHẦN, mã TODO và nhiệm vụ cụ thể.
+- Docstring là yêu cầu kỹ thuật từ submission_template.py của giảng viên.
+- Không đổi tên hàm, chữ ký tham số, annotation kiểu trả về.
+- Có thể thêm import và hàm phụ; không viết lệnh thực thi ở cấp module.
+- Không sửa submission.py trực tiếp: ghép bằng python3 build_submission.py.
+
+KIỂM THỬ:
+- Viết test dữ liệu nhỏ cho từng hàm ngay khi hoàn thành.
+- Phần B gọi pagerank() của phần A nên khi test tích hợp B phải có A.
+- Autograder tổng hợp có thể báo lỗi ở các phần còn TODO: đó là bình thường.
 """
 
 from __future__ import annotations
+from pathlib import Path
 
-# Thêm import cần thiết ngay dưới dòng này, ví dụ: import hashlib
+# TODO (nếu cần): thêm các import của Python standard library tại đây.
 
-# TODO B1–B2 • Chọn prefix chính xác, phân phối đều trong chủ đề.
+
+# ====================================================================
+# PHẦN B: TOPIC-SENSITIVE PAGERANK (30 ĐIỂM) | TODO B1–B2 | NGƯỜI 2
+# HÀM: topic_distribution()
+# NHIỆM VỤ: Đọc categories.tsv và tạo vector teleport theo chủ đề.
+# LIÊN KẾT: Dùng ids từ load_graph() của Người 1; vector truyền cho pagerank(..., teleport=...).
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
 def topic_distribution(
     ids: list[str], categories_path: Path, prefix: str
 ) -> list[float]:
@@ -26,7 +43,13 @@ def topic_distribution(
     raise NotImplementedError("Chưa cài đặt topic_distribution")
 
 
-# TODO B3 • Tổng tuyến tính các vector cùng chiều; kiểm tra weights.
+# ====================================================================
+# PHẦN B: TOPIC-SENSITIVE PAGERANK (30 ĐIỂM) | TODO B3 | NGƯỜI 2
+# HÀM: mix_pageranks()
+# NHIỆM VỤ: Kết hợp các vector điểm theo trọng số 0.5, 0.3, 0.2 cho 3 chủ đề.
+# LIÊN KẾT: Dùng kết quả pagerank() từ phần A với từng teleport; giữ cùng thứ tự ids.
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
 def mix_pageranks(
     topic_scores: list[list[float]], weights: list[float]
 ) -> list[float]:
@@ -41,32 +64,5 @@ def mix_pageranks(
     """
     # TODO: Sinh viên cài đặt.
     raise NotImplementedError("Chưa cài đặt mix_pageranks")
-
-
-# TODO C3 • Jaccard trên tập shingle chuỗi; xử lý tập rỗng.
-def jaccard(set_a: set[str], set_b: set[str]) -> float:
-    """Tính Jaccard chính xác trên hai tập CHUỖI shingle trước bước băm.
-
-    Trả kích thước giao chia kích thước hợp. Theo quy ước bài tập, hai tập
-    rỗng trả 1.0; chỉ một tập rỗng trả 0.0. Không dùng tập mã băm thay thế.
-    """
-    # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt jaccard")
-
-
-# TODO C3 • So tọa độ chữ ký, không biến signature thành set.
-def signature_similarity(
-    sig_a: list[int], sig_b: list[int], empty_a: bool, empty_b: bool
-) -> float:
-    """Ước lượng Jaccard bằng tỷ lệ tọa độ chữ ký trùng nhau.
-
-    Hai chữ ký phải cùng độ dài dương, dùng cùng bộ hàm băm và thứ tự.
-    empty_a/empty_b cho biết tập shingle gốc có rỗng hay không.
-    Hai tập rỗng trả 1.0; chỉ một tập rỗng trả 0.0. Các trường hợp còn
-    lại trả số tọa độ bằng nhau chia độ dài chữ ký. Không chuyển chữ ký
-    thành tập. Báo ValueError nếu độ dài không hợp lệ.
-    """
-    # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt signature_similarity")
 
 

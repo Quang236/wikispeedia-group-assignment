@@ -13,9 +13,13 @@ ROOT = Path(__file__).resolve().parent
 TEMPLATE = ROOT / "assignment/submission_template.py"
 OUTPUT = ROOT / "submission.py"
 OWNERS = {
-    "person1.py": ("load_graph", "pagerank", "normalize_text", "shingles"),
-    "person2.py": ("topic_distribution", "mix_pageranks", "jaccard", "signature_similarity"),
-    "person3.py": ("shingle_id", "minhash"),
+    # Chia trọn vẹn theo thuật toán/phần của đề:
+    "person1.py": ("load_graph", "pagerank"),  # A
+    "person2.py": ("topic_distribution", "mix_pageranks"),  # B
+    "person3.py": (  # C
+        "normalize_text", "shingles", "shingle_id",
+        "minhash", "jaccard", "signature_similarity",
+    ),
 }
 
 

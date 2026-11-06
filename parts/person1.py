@@ -1,15 +1,32 @@
-"""Người 1 — Đồ thị, PageRank và Shingling.
+"""NGƯỜI 1 — PHẦN A: PAGERANK (30 ĐIỂM)
 
-Chỉ sửa các hàm được giao. KHÔNG sửa tên hàm/chữ ký hàm từ đề gốc.
-Chạy `python3 build_submission.py` ở thư mục gốc để ghép tự động.
-Có thể thêm import và hàm phụ ở cấp module; script ghép sẽ thu thập chúng.
+PHÂN CÔNG: Chỉ viết các hàm TODO trong file này.
+HƯỚNG DẪN:
+- Mỗi hàm được đánh dấu PHẦN, mã TODO và nhiệm vụ cụ thể.
+- Docstring là yêu cầu kỹ thuật từ submission_template.py của giảng viên.
+- Không đổi tên hàm, chữ ký tham số, annotation kiểu trả về.
+- Có thể thêm import và hàm phụ; không viết lệnh thực thi ở cấp module.
+- Không sửa submission.py trực tiếp: ghép bằng python3 build_submission.py.
+
+KIỂM THỬ:
+- Viết test dữ liệu nhỏ cho từng hàm ngay khi hoàn thành.
+- Phần B gọi pagerank() của phần A nên khi test tích hợp B phải có A.
+- Autograder tổng hợp có thể báo lỗi ở các phần còn TODO: đó là bình thường.
 """
 
 from __future__ import annotations
+from pathlib import Path
 
-# Thêm import cần thiết ngay dưới dòng này, ví dụ: import hashlib
+# TODO (nếu cần): thêm các import của Python standard library tại đây.
 
-# TODO A1 • Đọc đồ thị: lọc/comment, ID, cạnh trùng, nút cụt và validate.
+
+# ====================================================================
+# PHẦN A: PAGERANK (30 ĐIỂM) | TODO A1 | NGƯỜI 1
+# HÀM: load_graph()
+# NHIỆM VỤ: Đọc articles.tsv và links.tsv, xây dựng đồ thị có hướng.
+# LIÊN KẾT: Đầu ra (ids, out_neighbors) được pagerank() sử dụng; Người 2 cần kết quả phần A để chạy phần B.
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
 def load_graph(
     articles_path: Path, links_path: Path
 ) -> tuple[list[str], list[list[int]]]:
@@ -26,7 +43,13 @@ def load_graph(
     raise NotImplementedError("Chưa cài đặt load_graph")
 
 
-# TODO A2–A4 • Lặp PageRank, teleport tùy chọn, dangling đều, L1.
+# ====================================================================
+# PHẦN A: PAGERANK (30 ĐIỂM) | TODO A2–A4 | NGƯỜI 1
+# HÀM: pagerank()
+# NHIỆM VỤ: Tính PageRank bằng power iteration, xử lý dangling node, teleport và hội tụ.
+# LIÊN KẾT: PHẢI hỗ trợ teleport=None và teleport tùy chọn để Người 2 tính Topic-sensitive PageRank.
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
 def pagerank(
     ids: list[str],
     out_neighbors: list[list[int]],
@@ -49,32 +72,5 @@ def pagerank(
     """
     # TODO: Sinh viên cài đặt.
     raise NotImplementedError("Chưa cài đặt pagerank")
-
-
-# TODO C1 • Chỉ lowercase ASCII; gom whitespace ASCII.
-def normalize_text(text: str) -> str:
-    r"""Chuẩn hóa chuỗi Unicode theo đúng quy tắc của phần C.
-
-    Chỉ đổi ASCII A–Z thành a–z. Gộp mỗi dãy ký tự thuộc tập dấu cách
-    ASCII, \t, \n, \r, \v, \f thành một dấu cách ASCII; bỏ dấu cách ASCII
-    ở hai đầu. Giữ nguyên các ký tự khác, dấu câu và toàn bộ nội dung.
-    Không chuẩn hóa Unicode, bỏ dấu hoặc gọi lower() cho toàn bộ Unicode.
-    Trả chuỗi đã chuẩn hóa; chuỗi rỗng hoặc chỉ có khoảng trắng trên trả ''.
-    """
-    # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt normalize_text")
-
-
-# TODO C1 • Tập k ký tự Unicode liên tiếp, không trùng.
-def shingles(text: str, k: int) -> set[str]:
-    """Tạo tập k-shingle từ chuỗi ĐÃ được normalize_text xử lý.
-
-    Mỗi shingle là k code point Unicode liên tiếp, không phải k byte/từ.
-    Trả tập chuỗi phân biệt; không lưu số lần xuất hiện hoặc vị trí.
-    Chuỗi ngắn hơn k trả tập rỗng. Báo ValueError nếu k không phải số
-    nguyên dương. Không chuẩn hóa văn bản thêm lần nữa trong hàm này.
-    """
-    # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt shingles")
 
 

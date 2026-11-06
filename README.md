@@ -8,9 +8,12 @@ Tham khảo đề gốc `bai-tap-wikispeedia.md` trước khi lập trình.
 
 | File | Thành viên | Các hàm cần hoàn thành |
 |---|---|---|
-| `parts/person1.py` | Người 1 | `load_graph`, `pagerank`, `normalize_text`, `shingles` |
-| `parts/person2.py` | Người 2 | `topic_distribution`, `mix_pageranks`, `jaccard`, `signature_similarity` |
-| `parts/person3.py` | Người 3 | `shingle_id`, `minhash`; phụ trách ghép code, chạy grader, CSV |
+| `parts/person1.py` | Người 1 — A, PageRank (30 điểm) | `load_graph`, `pagerank` |
+| `parts/person2.py` | Người 2 — B, Topic-sensitive PageRank (30 điểm) | `topic_distribution`, `mix_pageranks` |
+| `parts/person3.py` | Người 3 — C, Shingling & MinHash (35 điểm) | `normalize_text`, `shingles`, `shingle_id`, `minhash`, `jaccard`, `signature_similarity` |
+
+**Phối hợp:** Phần B cần `pagerank()` của A khi chạy tích hợp. Phần C triển khai độc lập.
+Cả nhóm cùng kiểm thử/tích hợp và review, không dồn toàn bộ trách nhiệm kiểm thử chung cho Người 3.
 
 **QUAN TRỌNG:** Chỉ điền nội dung vào hàm được giao; **không đổi tên, chữ ký hàm,
 kiểu trả về**. Các docstring lấy nguyên văn từ template chính thức. Có thể thêm
@@ -34,7 +37,7 @@ tar -xzf data/wikispeedia_articles_plaintext.tar.gz -C data
 `data/pairs.csv`, `assignment/minhash_params.json`, `autograder.py` và đề gốc
 đã nằm sẵn trong repo starter. Không sửa bộ cặp/hệ số/đề.
 
-## Ghép code (do người 3 phụ trách)
+## Ghép code (cả nhóm phối hợp)
 
 Ở thư mục dự án:
 
@@ -53,10 +56,6 @@ Khi tất cả TODO được hoàn thiện, `python3 submission.py` tạo 4 file
 `pagerank.csv`, `topic_pagerank.csv`, `minhash.csv`, `similarities.csv`.
 
 ## Cách làm chung trên GitHub (repository PRIVATE)
-
-**Một lần, người quản lý repository:**
-
-đã thông báo trên Zalo
 
 **Mỗi người làm trên nhánh riêng:**
 
@@ -89,8 +88,8 @@ chỉ thực hiện sau khi kiểm tra kỹ và thống nhất cả nhóm.
 ## Thứ tự review kiến thức
 
 - Người 2 review PageRank của người 1 (dangling, teleport, L1).
-- Người 3 review Topic PageRank & Jaccard của người 2 (prefix, trọng số, tập rỗng).
-- Người 1 review MinHash của người 3 (SHA-256, integer modulo, empty signature).
+- Người 3 review Topic PageRank của người 2 (prefix, trọng số, teleport).
+- Người 1 review Shingling & MinHash của người 3 (Unicode, SHA-256, integer modulo, empty signature).
 - Sau khi ghép, cả 3 cùng giải thích được các thuật toán và đọc kết quả grader.
 
 ## Chấm thử

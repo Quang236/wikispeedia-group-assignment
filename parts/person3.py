@@ -1,15 +1,71 @@
-"""Người 3 — MinHash và tích hợp.
+"""NGƯỜI 3 — PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM)
 
-Chỉ sửa các hàm được giao. KHÔNG sửa tên hàm/chữ ký hàm từ đề gốc.
-Chạy `python3 build_submission.py` ở thư mục gốc để ghép tự động.
-Có thể thêm import và hàm phụ ở cấp module; script ghép sẽ thu thập chúng.
+PHÂN CÔNG: Chỉ viết các hàm TODO trong file này.
+HƯỚNG DẪN:
+- Mỗi hàm được đánh dấu PHẦN, mã TODO và nhiệm vụ cụ thể.
+- Docstring là yêu cầu kỹ thuật từ submission_template.py của giảng viên.
+- Không đổi tên hàm, chữ ký tham số, annotation kiểu trả về.
+- Có thể thêm import và hàm phụ; không viết lệnh thực thi ở cấp module.
+- Không sửa submission.py trực tiếp: ghép bằng python3 build_submission.py.
+
+KIỂM THỬ:
+- Viết test dữ liệu nhỏ cho từng hàm ngay khi hoàn thành.
+- Phần B gọi pagerank() của phần A nên khi test tích hợp B phải có A.
+- Autograder tổng hợp có thể báo lỗi ở các phần còn TODO: đó là bình thường.
 """
 
 from __future__ import annotations
+from pathlib import Path
 
-# Thêm import cần thiết ngay dưới dòng này, ví dụ: import hashlib
+# TODO (nếu cần): thêm các import của Python standard library tại đây.
 
-# TODO C2 • SHA-256 UTF-8, 4 byte đầu big-endian, modulo p.
+
+# ====================================================================
+# PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM) | TODO C1 | NGƯỜI 3
+# HÀM: normalize_text()
+# NHIỆM VỤ: Chuẩn hóa văn bản Unicode theo quy tắc được mô tả trong docstring.
+# LIÊN KẾT: Bước đầu của pipeline phần C; đầu ra chuyển sang shingles().
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
+def normalize_text(text: str) -> str:
+    r"""Chuẩn hóa chuỗi Unicode theo đúng quy tắc của phần C.
+
+    Chỉ đổi ASCII A–Z thành a–z. Gộp mỗi dãy ký tự thuộc tập dấu cách
+    ASCII, \t, \n, \r, \v, \f thành một dấu cách ASCII; bỏ dấu cách ASCII
+    ở hai đầu. Giữ nguyên các ký tự khác, dấu câu và toàn bộ nội dung.
+    Không chuẩn hóa Unicode, bỏ dấu hoặc gọi lower() cho toàn bộ Unicode.
+    Trả chuỗi đã chuẩn hóa; chuỗi rỗng hoặc chỉ có khoảng trắng trên trả ''.
+    """
+    # TODO: Sinh viên cài đặt.
+    raise NotImplementedError("Chưa cài đặt normalize_text")
+
+
+# ====================================================================
+# PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM) | TODO C1 | NGƯỜI 3
+# HÀM: shingles()
+# NHIỆM VỤ: Tạo tập các đoạn k ký tự Unicode liên tiếp, không phải k từ.
+# LIÊN KẾT: Nhận văn bản đã normalize_text(); đầu ra dùng cho jaccard() và shingle_id().
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
+def shingles(text: str, k: int) -> set[str]:
+    """Tạo tập k-shingle từ chuỗi ĐÃ được normalize_text xử lý.
+
+    Mỗi shingle là k code point Unicode liên tiếp, không phải k byte/từ.
+    Trả tập chuỗi phân biệt; không lưu số lần xuất hiện hoặc vị trí.
+    Chuỗi ngắn hơn k trả tập rỗng. Báo ValueError nếu k không phải số
+    nguyên dương. Không chuẩn hóa văn bản thêm lần nữa trong hàm này.
+    """
+    # TODO: Sinh viên cài đặt.
+    raise NotImplementedError("Chưa cài đặt shingles")
+
+
+# ====================================================================
+# PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM) | TODO C2 | NGƯỜI 3
+# HÀM: shingle_id()
+# NHIỆM VỤ: Băm một shingle thành ID bằng SHA-256 và phép modulo p.
+# LIÊN KẾT: Nhận shingle từ shingles(); các ID dùng làm đầu vào minhash().
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
 def shingle_id(shingle: str, p: int) -> int:
     """Ánh xạ một shingle thành số nguyên trong [0, p-1].
 
@@ -21,7 +77,13 @@ def shingle_id(shingle: str, p: int) -> int:
     raise NotImplementedError("Chưa cài đặt shingle_id")
 
 
-# TODO C2 • Hệ số từ JSON, không phát sinh mới; tập rỗng trả [p,...].
+# ====================================================================
+# PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM) | TODO C2 | NGƯỜI 3
+# HÀM: minhash()
+# NHIỆM VỤ: Tạo chữ ký MinHash từ tập shingle IDs và bộ tham số băm đã cho.
+# LIÊN KẾT: Đầu ra dùng cho signature_similarity().
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
 def minhash(shingle_ids: set[int], hash_params: dict) -> list[int]:
     """Tính chữ ký từ tập mã shingle và bộ hàm băm dùng chung.
 
@@ -34,5 +96,44 @@ def minhash(shingle_ids: set[int], hash_params: dict) -> list[int]:
     """
     # TODO: Sinh viên cài đặt.
     raise NotImplementedError("Chưa cài đặt minhash")
+
+
+# ====================================================================
+# PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM) | TODO C3 | NGƯỜI 3
+# HÀM: jaccard()
+# NHIỆM VỤ: Tính Jaccard chính xác của hai tập shingle dạng chuỗi.
+# LIÊN KẾT: Nhận hai tập do shingles() tạo ra; xử lý trường hợp rỗng theo đề.
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
+def jaccard(set_a: set[str], set_b: set[str]) -> float:
+    """Tính Jaccard chính xác trên hai tập CHUỖI shingle trước bước băm.
+
+    Trả kích thước giao chia kích thước hợp. Theo quy ước bài tập, hai tập
+    rỗng trả 1.0; chỉ một tập rỗng trả 0.0. Không dùng tập mã băm thay thế.
+    """
+    # TODO: Sinh viên cài đặt.
+    raise NotImplementedError("Chưa cài đặt jaccard")
+
+
+# ====================================================================
+# PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM) | TODO C3 | NGƯỜI 3
+# HÀM: signature_similarity()
+# NHIỆM VỤ: Ước lượng độ tương đồng bằng tỷ lệ tọa độ chữ ký trùng nhau.
+# LIÊN KẾT: Nhận chữ ký từ minhash() và cờ hai tập đầu vào rỗng.
+# LƯU Ý: Giữ nguyên docstring, tham số, kiểu trả về và quy tắc xử lý lỗi.
+# ====================================================================
+def signature_similarity(
+    sig_a: list[int], sig_b: list[int], empty_a: bool, empty_b: bool
+) -> float:
+    """Ước lượng Jaccard bằng tỷ lệ tọa độ chữ ký trùng nhau.
+
+    Hai chữ ký phải cùng độ dài dương, dùng cùng bộ hàm băm và thứ tự.
+    empty_a/empty_b cho biết tập shingle gốc có rỗng hay không.
+    Hai tập rỗng trả 1.0; chỉ một tập rỗng trả 0.0. Các trường hợp còn
+    lại trả số tọa độ bằng nhau chia độ dài chữ ký. Không chuyển chữ ký
+    thành tập. Báo ValueError nếu độ dài không hợp lệ.
+    """
+    # TODO: Sinh viên cài đặt.
+    raise NotImplementedError("Chưa cài đặt signature_similarity")
 
 
