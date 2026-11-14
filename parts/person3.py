@@ -17,8 +17,9 @@ KIỂM THỬ:
 from __future__ import annotations
 from pathlib import Path
 
-# TODO (nếu cần): thêm các import của Python standard library tại đây.
 
+# TODO (nếu cần): thêm các import của Python standard library tại đây.
+import hashlib
 
 # ====================================================================
 # PHẦN C: SHINGLING, MINHASH & SIMILARITY (35 ĐIỂM) | TODO C1 | NGƯỜI 3
@@ -37,7 +38,11 @@ def normalize_text(text: str) -> str:
     Trả chuỗi đã chuẩn hóa; chuỗi rỗng hoặc chỉ có khoảng trắng trên trả ''.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt normalize_text")
+    if not text or not text.strip():
+        return ""
+    trans_table = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')
+    text = text.translate(trans_table)
+    return text
 
 
 # ====================================================================
@@ -56,7 +61,9 @@ def shingles(text: str, k: int) -> set[str]:
     nguyên dương. Không chuẩn hóa văn bản thêm lần nữa trong hàm này.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt shingles")
+    if k <=0: raise ValueError
+    if len(text) < k: return set()
+    return {text[i:i + k] for i in range(len(text) - k + 1)}
 
 
 # ====================================================================
@@ -74,7 +81,11 @@ def shingle_id(shingle: str, p: int) -> int:
     Trả int tất định giữa các lần chạy. Báo ValueError nếu p <= 1.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt shingle_id")
+    if p <= 1: raise ValueError
+    shingle_bytes = shingle.encode("utf-8")
+    hash_shingle = hashlib.sha256(shingle_bytes).digest() #trả về chuỗi byte nhị phân
+    int_value = int.from_bytes(hash_shingle[:4], byteorder='big', signed=False) #byteorder đọc theo thứ tự, signed dấu
+    return int_value % p
 
 
 # ====================================================================
@@ -95,7 +106,20 @@ def minhash(shingle_ids: set[int], hash_params: dict) -> list[int]:
     xác. Không sinh hệ số mới, không trả ID phần tử đạt min.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt minhash")
+    p = hash_params["p"]
+    hash_funcs = hash_params["hash_functions"]
+    if not shingle_ids:
+        return [p] * len(hash_funcs)
+    signature = []
+    for hf in hash_funcs:
+        a = hf["a"]
+        b = hf["b"]
+        min_val = p
+        for x in shingle_ids:
+            toa_do = (a * x + b) % p
+            min_val = min(toa_do, min_val)
+        signature.append(min_val)
+    return signature
 
 
 # ====================================================================
@@ -112,7 +136,13 @@ def jaccard(set_a: set[str], set_b: set[str]) -> float:
     rỗng trả 1.0; chỉ một tập rỗng trả 0.0. Không dùng tập mã băm thay thế.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt jaccard")
+    if (not set_a) and (not set_b):
+        return float(1)
+    if (not set_a and set_b) or (not set_b and set_a):
+        return float(0)
+    intersection = (set_a & set_b)
+    union = (set_a | set_b)
+    return float(len(intersection) / len(union))
 
 
 # ====================================================================
@@ -134,6 +164,11 @@ def signature_similarity(
     thành tập. Báo ValueError nếu độ dài không hợp lệ.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt signature_similarity")
-
-
+    if empty_a and empty_b:
+        return 1.0
+    if empty_a or empty_b:
+        return 0.0
+    if (len(sig_a) != len(sig_b)) or len(sig_a) <= 0:
+        raise ValueError
+    matches = sum(1 for x, y in zip(sig_a, sig_b) if x == y)
+    return float(matches / len(sig_a))
