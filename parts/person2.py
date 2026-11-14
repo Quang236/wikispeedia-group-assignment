@@ -18,6 +18,8 @@ from __future__ import annotations
 from pathlib import Path
 
 # TODO (nếu cần): thêm các import của Python standard library tại đây.
+import math
+import numbers
 
 
 # ====================================================================
@@ -40,7 +42,42 @@ def topic_distribution(
     nhãn tham chiếu ID ngoài ids. Không dùng nội dung bài để suy ra nhãn.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt topic_distribution")
+    if not ids:
+        raise ValueError("Danh sách ids không được rỗng")
+    if not isinstance(prefix, str) or not prefix.strip():
+        raise ValueError("Tiền tố chủ đề (prefix) không hợp lệ")
+
+    known_ids = set(ids)
+    if len(known_ids) != len(ids):
+        raise ValueError("Danh sách ids chứa phần tử trùng lặp")
+
+    selected: set[str] = set()
+    sub_prefix = prefix + "."
+
+    with open(categories_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            parts = line.split("\t")
+            if len(parts) != 2:
+                raise ValueError(f"Dòng không đúng định dạng TSV 2 cột: {line!r}")
+
+            article_id, category = parts
+            if article_id not in known_ids:
+                raise ValueError(
+                    f"Dữ liệu nhãn tham chiếu ID ngoài tập đỉnh ids: {article_id!r}"
+                )
+
+            if category == prefix or category.startswith(sub_prefix):
+                selected.add(article_id)
+
+    if not selected:
+        raise ValueError(f"Tập chủ đề rỗng với prefix: {prefix!r}")
+
+    prob = 1.0 / len(selected)
+    return [prob if article_id in selected else 0.0 for article_id in ids]
 
 
 # ====================================================================
@@ -63,6 +100,41 @@ def mix_pageranks(
     Báo ValueError nếu danh sách rỗng, kích thước hoặc trọng số không hợp lệ.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt mix_pageranks")
+    if not topic_scores or not weights:
+        raise ValueError("Danh sách topic_scores và weights không được rỗng")
+    if len(topic_scores) != len(weights):
+        raise ValueError("Số lượng vector điểm và số lượng trọng số không khớp")
+
+    for w in weights:
+        if (
+            not isinstance(w, numbers.Real)
+            or isinstance(w, bool)
+            or not math.isfinite(w)
+            or w < 0
+        ):
+            raise ValueError(f"Trọng số không hợp lệ: {w!r}")
+
+    if abs(math.fsum(weights) - 1.0) > 1e-12:
+        raise ValueError("Tổng các trọng số lệch 1 quá 1e-12")
+
+    n = len(topic_scores[0])
+    if n == 0:
+        raise ValueError("Vector điểm không được rỗng")
+
+    for vec in topic_scores:
+        if len(vec) != n:
+            raise ValueError("Các vector trong topic_scores phải có cùng độ dài")
+        for val in vec:
+            if (
+                not isinstance(val, numbers.Real)
+                or isinstance(val, bool)
+                or not math.isfinite(val)
+            ):
+                raise ValueError(f"Giá trị điểm không hợp lệ: {val!r}")
+
+    return [
+        math.fsum(w * vec[i] for w, vec in zip(weights, topic_scores))
+        for i in range(n)
+    ]
 
 
