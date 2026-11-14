@@ -12,6 +12,16 @@ import csv
 import json
 from pathlib import Path
 
+import math
+import numbers
+import hashlib
+
+import sys
+
+reconfigure = getattr(sys.stdout, "reconfigure", None)
+if reconfigure is not None:
+    reconfigure(encoding="utf-8")
+
 
 def load_graph(
     articles_path: Path, links_path: Path
@@ -26,16 +36,64 @@ def load_graph(
     Báo ValueError nếu đồ thị rỗng hoặc cạnh chứa ID ngoài tập đỉnh.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt load_graph")
+    article = set() # loại bỏ id trùng
+    with open(articles_path,"r",encoding="utf-8") as f:
+        for line in f:
+            line = line.strip() # bỏ khoảng trắng
+            if not line or line.startswith("#"): #nếu line rỗng hoặc bắt đầu = "#" thì bỏ qua
+                continue
+            article.add(line) #thêm vào set
+
+    # Sắp xếp tập đỉnh theo thứ tự từ điển của byte UTF-8    
+    # Quy ước đề bài: sắp xếp theo biểu diễn byte UTF-8 của tên bài viết
+    ids = sorted(article, key=lambda x: x.encode("utf-8"))
+
+    # Báo lỗi ValueError nếu đồ thị rỗng (không có đỉnh nào)
+    if not ids:
+        raise ValueError("Đồ thị rỗng")
+
+    # Tạo từ điển ánh xạ (ID bài viết -> Chỉ số số nguyên 0..N-1)
+
+    # Tra cứu chỉ số đỉnh thay vì tìm tuyến tính trong list
+    id_to_index = {article_id: idx for idx, article_id in enumerate(ids)}
+
+    # Đọc danh sách cạnh từ links.tsv và xây dựng danh sách kề
+    # Khởi tạo một set cho mỗi đỉnh:
+    # - Tự động loại bỏ cạnh trùng (duplicate edges)
+    # - Đỉnh cụt (dangling nodes / out-degree = 0) sẽ giữ nguyên set rỗng
+    out_sets = [set() for _ in range(len(ids))]
+
+    with open(links_path,"r",encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            # Mỗi dòng có dạng: source<TAB>target
+            source, target = line.split("\t")
+
+            # Báo lỗi nếu đầu mút không thuộc tập đỉnh trong articles.tsv
+            if source not in id_to_index or target not in id_to_index:
+                raise ValueError(f"Cạnh chứa ID ngoài tập đỉnh: ({source} -> {target})")
+
+            source_idx = id_to_index[source]
+            target_idx = id_to_index[target]
+
+            # Thêm đỉnh đích vào tập lân cận đi ra của đỉnh nguồn (giữ cả self-loop)
+            out_sets[source_idx].add(target_idx)
+
+        out_neighbours = [sorted(i) for i in out_sets]
+
+    return ids,out_neighbours
 
 
 def pagerank(
-    ids: list[str],
-    out_neighbors: list[list[int]],
-    beta: float,
-    tol: float,
-    max_iter: int,
-    teleport: list[float] | None = None,
+    ids: list[str], #ds các đỉnh của đồ thị
+    out_neighbors: list[list[int]], #ds các đích đến (ds kề)
+    beta: float, #xác suất đi theo lk
+    tol: float, #ngưỡng sai số để dừng
+    max_iter: int, #số vòng lặp tối đa
+    teleport: list[float] | None = None, #phân phối xs nhảy ngẫu nhiên
 ) -> list[float]:
     """Tính PageRank toàn cục hoặc theo phân phối dịch chuyển cho trước.
 
@@ -50,7 +108,57 @@ def pagerank(
     Báo ValueError nếu tham số hoặc phân phối dịch chuyển không hợp lệ.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt pagerank")
+    #check điều kiện tham số truyền vào 
+    if not (0<beta<1):
+        raise ValueError("beta không hợp lệ, cần trong khoảng 0-1")
+    if not (tol > 0):
+        raise ValueError("Tol không hợp lệ, cần là số dương")
+    if type(max_iter) is not int or max_iter <1:
+        raise ValueError("max_iter không hợp lệ")
+
+    n = len(ids) #số đỉnh
+    if teleport is None: # không có teleport
+        v = [1/n for _ in range(n)]
+    else: #sensitive-pagerank
+        if len(teleport) != n:
+            raise ValueError(" Độ dài teleport không hợp lệ")
+        for p in teleport:
+            if p < 0 or not math.isfinite(p):
+                raise ValueError(" Giá trị của teleport không hợp lệ")
+        if abs(sum(teleport)-1) > 1e-12:
+            raise ValueError(" Tổng xác suất teleport không hợp lệ")
+        v = list(teleport)
+    
+    r = v.copy()
+
+    for _ in range(max_iter):
+        r_new = [0.0 for _ in range(n)]
+        dinh_cut = 0.0
+        for j in range(n):
+            if not out_neighbors[j]:
+                dinh_cut += r[j]
+        bu_nut_cut = (beta* dinh_cut) / n
+        for i in range(n):
+            r_new[i] = bu_nut_cut + (1-beta)*v[i]
+
+        # điểm từ các liên kết
+        for s in range(n):
+            neighbour = out_neighbors[s]
+            if not neighbour:
+                continue
+            diem_tu_lk = beta* (r[s]/len(neighbour))
+            for target in neighbour:
+                r_new[target] += diem_tu_lk
+        
+        error = 0.0
+        for l in range(n):
+            error += abs(r_new[l]-r[l])
+        r = r_new
+        if error <= tol:
+            break
+
+
+    return r
 
 
 def topic_distribution(
@@ -66,7 +174,42 @@ def topic_distribution(
     nhãn tham chiếu ID ngoài ids. Không dùng nội dung bài để suy ra nhãn.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt topic_distribution")
+    if not ids:
+        raise ValueError("Danh sách ids không được rỗng")
+    if not isinstance(prefix, str) or not prefix.strip():
+        raise ValueError("Tiền tố chủ đề (prefix) không hợp lệ")
+
+    known_ids = set(ids)
+    if len(known_ids) != len(ids):
+        raise ValueError("Danh sách ids chứa phần tử trùng lặp")
+
+    selected: set[str] = set()
+    sub_prefix = prefix + "."
+
+    with open(categories_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            parts = line.split("\t")
+            if len(parts) != 2:
+                raise ValueError(f"Dòng không đúng định dạng TSV 2 cột: {line!r}")
+
+            article_id, category = parts
+            if article_id not in known_ids:
+                raise ValueError(
+                    f"Dữ liệu nhãn tham chiếu ID ngoài tập đỉnh ids: {article_id!r}"
+                )
+
+            if category == prefix or category.startswith(sub_prefix):
+                selected.add(article_id)
+
+    if not selected:
+        raise ValueError(f"Tập chủ đề rỗng với prefix: {prefix!r}")
+
+    prob = 1.0 / len(selected)
+    return [prob if article_id in selected else 0.0 for article_id in ids]
 
 
 def mix_pageranks(
@@ -82,7 +225,42 @@ def mix_pageranks(
     Báo ValueError nếu danh sách rỗng, kích thước hoặc trọng số không hợp lệ.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt mix_pageranks")
+    if not topic_scores or not weights:
+        raise ValueError("Danh sách topic_scores và weights không được rỗng")
+    if len(topic_scores) != len(weights):
+        raise ValueError("Số lượng vector điểm và số lượng trọng số không khớp")
+
+    for w in weights:
+        if (
+            not isinstance(w, numbers.Real)
+            or isinstance(w, bool)
+            or not math.isfinite(w)
+            or w < 0
+        ):
+            raise ValueError(f"Trọng số không hợp lệ: {w!r}")
+
+    if abs(math.fsum(weights) - 1.0) > 1e-12:
+        raise ValueError("Tổng các trọng số lệch 1 quá 1e-12")
+
+    n = len(topic_scores[0])
+    if n == 0:
+        raise ValueError("Vector điểm không được rỗng")
+
+    for vec in topic_scores:
+        if len(vec) != n:
+            raise ValueError("Các vector trong topic_scores phải có cùng độ dài")
+        for val in vec:
+            if (
+                not isinstance(val, numbers.Real)
+                or isinstance(val, bool)
+                or not math.isfinite(val)
+            ):
+                raise ValueError(f"Giá trị điểm không hợp lệ: {val!r}")
+
+    return [
+        math.fsum(w * vec[i] for w, vec in zip(weights, topic_scores))
+        for i in range(n)
+    ]
 
 
 def normalize_text(text: str) -> str:
@@ -95,7 +273,26 @@ def normalize_text(text: str) -> str:
     Trả chuỗi đã chuẩn hóa; chuỗi rỗng hoặc chỉ có khoảng trắng trên trả ''.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt normalize_text")
+    trans_table = str.maketrans(
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'abcdefghijklmnopqrstuvwxyz'
+    )
+    text = text.translate(trans_table)
+
+    result = []
+    whitespace = " \t\n\r\v\f"
+
+    for char in text:
+        if char in whitespace:
+            if result and result[-1] != " ":
+                result.append(" ")
+        else:
+            result.append(char)
+
+    if result and result[-1] == " ":
+        result.pop()
+
+    return "".join(result)
 
 
 def shingles(text: str, k: int) -> set[str]:
@@ -107,7 +304,10 @@ def shingles(text: str, k: int) -> set[str]:
     nguyên dương. Không chuẩn hóa văn bản thêm lần nữa trong hàm này.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt shingles")
+    if not isinstance(k, int) or isinstance(k, bool) or k <= 0:
+        raise ValueError("k phải là số nguyên dương")
+    if len(text) < k: return set()
+    return {text[i:i + k] for i in range(len(text) - k + 1)}
 
 
 def shingle_id(shingle: str, p: int) -> int:
@@ -118,7 +318,11 @@ def shingle_id(shingle: str, p: int) -> int:
     Trả int tất định giữa các lần chạy. Báo ValueError nếu p <= 1.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt shingle_id")
+    if p <= 1: raise ValueError
+    shingle_bytes = shingle.encode("utf-8")
+    hash_shingle = hashlib.sha256(shingle_bytes).digest() #trả về chuỗi byte nhị phân
+    int_value = int.from_bytes(hash_shingle[:4], byteorder='big', signed=False) #byteorder đọc theo thứ tự, signed dấu
+    return int_value % p
 
 
 def minhash(shingle_ids: set[int], hash_params: dict) -> list[int]:
@@ -132,7 +336,20 @@ def minhash(shingle_ids: set[int], hash_params: dict) -> list[int]:
     xác. Không sinh hệ số mới, không trả ID phần tử đạt min.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt minhash")
+    p = hash_params["p"]
+    hash_funcs = hash_params["hash_functions"]
+    if not shingle_ids:
+        return [p] * len(hash_funcs)
+    signature = []
+    for hf in hash_funcs:
+        a = hf["a"]
+        b = hf["b"]
+        min_val = min(
+        (a * x + b) % p
+        for x in shingle_ids
+        )
+        signature.append(min_val)
+    return signature
 
 
 def jaccard(set_a: set[str], set_b: set[str]) -> float:
@@ -142,7 +359,16 @@ def jaccard(set_a: set[str], set_b: set[str]) -> float:
     rỗng trả 1.0; chỉ một tập rỗng trả 0.0. Không dùng tập mã băm thay thế.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt jaccard")
+    if not set_a and not set_b:
+        return 1.0
+
+    if not set_a or not set_b:
+        return 0.0
+
+    intersection = len(set_a & set_b)
+    union = len(set_a) + len(set_b) - intersection
+
+    return intersection / union
 
 
 def signature_similarity(
@@ -157,7 +383,14 @@ def signature_similarity(
     thành tập. Báo ValueError nếu độ dài không hợp lệ.
     """
     # TODO: Sinh viên cài đặt.
-    raise NotImplementedError("Chưa cài đặt signature_similarity")
+    if (len(sig_a) != len(sig_b)) or len(sig_a) <= 0:
+        raise ValueError
+    if empty_a and empty_b:
+        return 1.0
+    if empty_a or empty_b:
+        return 0.0
+    matches = sum(1 for x, y in zip(sig_a, sig_b) if x == y)
+    return float(matches / len(sig_a))
 
 
 def main() -> None:
